@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body { @apply bg-ground text-ink antialiased; }
+  h1, h2, h3, h4 { letter-spacing: -0.022em; text-wrap: pretty; }
+  a { @apply text-green-700; }
+  a:hover { @apply text-gold-700; }
+  :focus-visible { outline: 2px solid #A87E1F; outline-offset: 3px; }
+  ::selection { background: rgba(199, 154, 46, 0.35); }
+  input::placeholder { color: rgba(252, 251, 249, 0.62); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
