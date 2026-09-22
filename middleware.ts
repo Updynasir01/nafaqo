@@ -9,18 +9,10 @@ export async function middleware(request: NextRequest) {
   if (PUBLIC_ADMIN_PATHS.includes(pathname)) return NextResponse.next();
 
   const authorised = await verifySession(request.cookies.get(SESSION_COOKIE)?.value);
-  if (authorised) return NextResponse.next();
-
-  if (pathname.startsWith("/api/admin")) {
-    return NextResponse.json({ error: "Not authorised." }, { status: 401 });
-  }
-
-  const url = request.nextUrl.clone();
-  url.pathname = "/admin/login";
-  url.search = pathname === "/admin" ? "" : "?next=" + encodeURIComponent(pathname);
-  return NextResponse.redirect(url);
+  if (!authorised) return NextResponse.json({ error: "Not authorised." }, { status: 401 });
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/admin", "/admin/((?!login).*)", "/api/admin/:path*"],
+  matcher: ["/api/admin/:path*"],
 };
