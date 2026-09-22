@@ -32,6 +32,7 @@ export default function AdminConsole() {
   const [view, setView] = useState<string>("overview");
   const [pw, setPw] = useState({ current: "", next: "", confirm: "" });
   const [pwNote, setPwNote] = useState("");
+  const [pwShown, setPwShown] = useState(false);
   const [data, setData] = useState<Data | null>(null);
   const [error, setError] = useState("");
   const [draft, setDraft] = useState({ tag: "", title: "", excerpt: "", body: "", fileUrl: "" });
@@ -354,13 +355,35 @@ export default function AdminConsole() {
                 ).map(([field, label]) => (
                   <label key={field} className="text-[13px] font-bold">
                     {label}
-                    <input
-                      type="password"
-                      autoComplete={field === "current" ? "current-password" : "new-password"}
-                      value={pw[field]}
-                      onChange={(event) => setPw({ ...pw, [field]: event.target.value })}
-                      className="mt-1.5 w-full rounded-[10px] border border-divider px-3 py-2.5 text-[14.5px] font-normal"
-                    />
+                    <span className="relative mt-1.5 block">
+                      <input
+                        type={pwShown ? "text" : "password"}
+                        autoComplete={field === "current" ? "current-password" : "new-password"}
+                        value={pw[field]}
+                        onChange={(event) => setPw({ ...pw, [field]: event.target.value })}
+                        className="w-full rounded-[10px] border border-divider px-3 py-2.5 pr-11 text-[14.5px] font-normal"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setPwShown((v) => !v)}
+                        aria-label={pwShown ? "Hide passwords" : "Show passwords"}
+                        title={pwShown ? "Hide passwords" : "Show passwords"}
+                        className="absolute right-1 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full text-sand-700 hover:bg-surface"
+                      >
+                        {pwShown ? (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M10.7 5.1A9.8 9.8 0 0 1 12 5c6 0 10 7 10 7a17.6 17.6 0 0 1-2.4 3.2M6.6 6.6A17.8 17.8 0 0 0 2 12s4 7 10 7a9.6 9.6 0 0 0 4.2-.9" />
+                            <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+                            <path d="m2 2 20 20" />
+                          </svg>
+                        ) : (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z" />
+                            <circle cx="12" cy="12" r="3" />
+                          </svg>
+                        )}
+                      </button>
+                    </span>
                   </label>
                 ))}
                 <button
