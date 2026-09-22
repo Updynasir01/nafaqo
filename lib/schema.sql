@@ -42,3 +42,9 @@ create table if not exists documents (
 insert into documents (title, note, status)
 select 'Institutional profile', 'Who we are, the model and the standards we hold ourselves to.', 'On request'
 where not exists (select 1 from documents);
+
+create table if not exists app_settings (
+  key         text primary key,
+  value       text not null,
+  updated_at  timestamptz not null default now()
+);

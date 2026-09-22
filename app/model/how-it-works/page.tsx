@@ -27,7 +27,7 @@ export default function HowItWorksPage() {
         </Shell>
       </Section>
 
-      {/* <Section>
+      <Section>
         <Shell className="py-20">
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
             {modelNodes.map((node) => (
@@ -38,7 +38,7 @@ export default function HowItWorksPage() {
             ))}
           </div>
         </Shell>
-      </Section> */}
+      </Section>
 
       <Section tone="surface">
         <Shell className="py-20">
@@ -52,14 +52,14 @@ export default function HowItWorksPage() {
               </div>
             ))}
           </div>
-          {/* <div className="mt-16 grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-16 grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-4">
             {phases.map((phase) => (
               <div key={phase.num} className="border-t-2 border-gold-400 pt-4">
                 <h3 className="text-[18px] leading-[1.2]">{phase.title}</h3>
                 <p className="mt-2 text-[15px] leading-[1.58] text-sand-700">{phase.body}</p>
               </div>
             ))}
-          </div> */}
+          </div>
         </Shell>
       </Section>
 

@@ -11,18 +11,16 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [drop, setDrop] = useState("");
   const [scrolled, setScrolled] = useState(false);
+  const [openGroup, setOpenGroup] = useState("");
   const shell = useRef<HTMLElement>(null);
 
   const overHero = pathname === "/" && !scrolled;
 
-  const mobileLinks: { href: string; label: string }[] = [
-    ...nav.flatMap((menu) => menu.items.map((item) => ({ href: item.href as string, label: item.label as string }))),
-    { href: "/contact", label: "Contact" },
-  ];
 
   useEffect(() => {
     setOpen(false);
     setDrop("");
+    setOpenGroup("");
   }, [pathname]);
 
   useEffect(() => {
@@ -144,23 +142,88 @@ export default function Navbar() {
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             className={
-              "ml-2 flex h-[42px] w-[42px] flex-col items-center justify-center gap-[5px] rounded-full border px-[11px] lg:hidden " +
+              "ml-2 flex h-[42px] w-[42px] flex-col items-center justify-center gap-[5px] rounded-full border lg:hidden " +
               (overHero ? "border-white/55" : "border-divider")
             }
           >
-            <span className={"h-0.5 w-full rounded " + (overHero ? "bg-white" : "bg-ink")} />
-            <span className={"h-0.5 w-full rounded " + (overHero ? "bg-white" : "bg-ink")} />
+            {open ? (
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                className={overHero ? "text-white" : "text-ink"}
+              >
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            ) : (
+              <>
+                <span className={"h-0.5 w-[18px] rounded " + (overHero ? "bg-white" : "bg-ink")} />
+                <span className={"h-0.5 w-[18px] rounded " + (overHero ? "bg-white" : "bg-ink")} />
+              </>
+            )}
           </button>
         </nav>
       </div>
 
       {open ? (
         <div className="flex flex-col border-t border-divider bg-ground px-6 pb-6 pt-4 lg:hidden">
-          {mobileLinks.map((item) => (
-            <Link key={item.href} href={item.href} className="border-b border-divider py-4 text-[19px] font-semibold text-ink no-underline">
-              {item.label}
-            </Link>
+          {nav.map((menu) => (
+            <div key={menu.label} className="border-b border-divider">
+              <button
+                type="button"
+                aria-expanded={openGroup === menu.label}
+                onClick={() => setOpenGroup((v) => (v === menu.label ? "" : menu.label))}
+                className="flex w-full items-center justify-between gap-4 py-4 text-left font-head text-[19px] font-semibold text-ink"
+              >
+                {menu.label}
+                <svg
+                  width="19"
+                  height="19"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.75"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className={
+                    "flex-none text-green-700 transition-transform duration-200 " +
+                    (openGroup === menu.label ? "rotate-180" : "")
+                  }
+                >
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+              {openGroup === menu.label ? (
+                <div className="flex flex-col pb-4 pl-4">
+                  {menu.items.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={
+                        "py-2.5 text-[16.5px] no-underline " +
+                        (pathname === item.href ? "font-bold text-green-800" : "font-medium text-sand-700")
+                      }
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              ) : null}
+            </div>
           ))}
+          <Link
+            href="/contact"
+            className={
+              "border-b border-divider py-4 font-head text-[19px] font-semibold no-underline " +
+              (pathname === "/contact" ? "text-green-800" : "text-ink")
+            }
+          >
+            Contact
+          </Link>
         </div>
       ) : null}
     </header>

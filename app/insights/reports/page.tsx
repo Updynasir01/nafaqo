@@ -30,7 +30,7 @@ export default async function ReportsPage() {
         standfirst="These are the measures we commit to reporting openly, including the ones that disappoint. Figures will be published as the Mogadishu pilot generates them."
       />
 
-      {/* <Section>
+      <Section>
         <Shell className="py-20">
           <h2 className="max-w-[26ch] text-[clamp(25px,3vw,36px)] leading-[1.08]">What we will publish</h2>
           <div className="mt-10 grid grid-cols-1 gap-x-10 gap-y-6 sm:grid-cols-2">
@@ -46,7 +46,7 @@ export default async function ReportsPage() {
             behind our claims.
           </Quote>
         </Shell>
-      </Section> */}
+      </Section>
 
       <Section tone="surface">
         <Shell className="py-20">

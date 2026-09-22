@@ -33,7 +33,7 @@ export default function WhyNafaqoPage() {
             ))}
           </div>
 
-          {/* <div className="mt-16 rounded-lg bg-green-800 p-[clamp(28px,4vw,56px)]">
+          <div className="mt-16 rounded-lg bg-green-800 p-[clamp(28px,4vw,56px)]">
             <h2 className="max-w-[24ch] text-[clamp(23px,2.8vw,34px)] leading-[1.1]">Co-investment, not charity</h2>
             <p className="mt-4 max-w-[54ch] text-[16.5px] leading-[1.65] text-white/[0.85]">
               School feeding is affordable when the cost is shared, and durable when the share moves steadily towards
@@ -48,7 +48,7 @@ export default function WhyNafaqoPage() {
                 </div>
               ))}
             </div>
-          </div> */}
+          </div>
         </Shell>
       </Section>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 type Enquiry = { id: number; name: string; organisation: string | null; email: string; partner_type: string | null; message: string; status: string; created_at: string };
@@ -15,6 +16,7 @@ const VIEWS = [
   ["reports", "Reports"],
   ["enquiries", "Enquiries"],
   ["subscribers", "Subscribers"],
+  ["settings", "Settings"],
 ] as const;
 
 const DOC_STATUSES = ["On request", "After launch", "Annually", "Published"];
@@ -26,81 +28,74 @@ const chip = (tone: "green" | "gold" | "grey") =>
 const date = (value: string) => new Date(value).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 
 export default function AdminConsole() {
-  const [key, setKey] = useState("");
-  const [authed, setAuthed] = useState(false);
+  const router = useRouter();
   const [view, setView] = useState<string>("overview");
+  const [pw, setPw] = useState({ current: "", next: "", confirm: "" });
+  const [pwNote, setPwNote] = useState("");
   const [data, setData] = useState<Data | null>(null);
   const [error, setError] = useState("");
-  const [draft, setDraft] = useState({ tag: "", title: "", excerpt: "", fileUrl: "" });
+  const [draft, setDraft] = useState({ tag: "", title: "", excerpt: "", body: "", fileUrl: "" });
 
-  useEffect(() => {
-    const stored = window.sessionStorage.getItem("nafaqo-admin-key");
-    if (stored) {
-      setKey(stored);
-      setAuthed(true);
+  const load = useCallback(async () => {
+    const response = await fetch("/api/admin/data", { cache: "no-store" });
+    if (response.status === 401) {
+      router.replace("/admin/login");
+      return;
     }
-  }, []);
-
-  const load = useCallback(async (adminKey: string) => {
-    const response = await fetch("/api/admin/data", { headers: { "x-admin-key": adminKey }, cache: "no-store" });
     if (!response.ok) {
       const body = await response.json().catch(() => ({}));
       throw new Error(body.error ?? "Could not load the dashboard.");
     }
     setData(await response.json());
-  }, []);
+  }, [router]);
 
   useEffect(() => {
-    if (!authed || !key) return;
-    load(key).catch((err: Error) => {
-      setError(err.message);
-      setAuthed(false);
+    load().catch((err: Error) => setError(err.message));
+  }, [load]);
+
+  async function signOut() {
+    await fetch("/api/admin/logout", { method: "POST" });
+    router.replace("/admin/login");
+    router.refresh();
+  }
+
+  async function changePassword() {
+    setPwNote("");
+    if (pw.next !== pw.confirm) {
+      setPwNote("The new passwords do not match.");
+      return;
+    }
+    const response = await fetch("/api/admin/password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ current: pw.current, next: pw.next }),
     });
-  }, [authed, key, load]);
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      setPwNote(body.error ?? "The password could not be changed.");
+      return;
+    }
+    setPw({ current: "", next: "", confirm: "" });
+    setPwNote("Password changed.");
+  }
 
   async function act(payload: Record<string, unknown>) {
     setError("");
     const response = await fetch("/api/admin/action", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-admin-key": key },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
+    if (response.status === 401) {
+      router.replace("/admin/login");
+      return;
+    }
     if (!response.ok) {
       const body = await response.json().catch(() => ({}));
       setError(body.error ?? "The change could not be saved.");
       return;
     }
-    await load(key);
-  }
-
-  if (!authed) {
-    return (
-      <div className="flex min-h-screen items-center justify-center p-6">
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            window.sessionStorage.setItem("nafaqo-admin-key", key);
-            setError("");
-            setAuthed(true);
-          }}
-          className="w-full max-w-[380px] rounded-lg bg-ground p-8 shadow-lg"
-        >
-          <h1 className="text-[22px]">Nafaqo dashboard</h1>
-          <p className="mt-2 text-[14.5px] text-sand-700">Enter the admin key to continue.</p>
-          <input
-            type="password"
-            value={key}
-            onChange={(event) => setKey(event.target.value)}
-            className="mt-5 w-full rounded-md border border-divider px-4 py-3 text-[15px]"
-            placeholder="Admin key"
-          />
-          <button type="submit" className="mt-4 w-full rounded-full bg-green-700 px-6 py-3 text-[15px] font-bold text-white">
-            Sign in
-          </button>
-          {error ? <p className="mt-3 text-[14px] text-gold-700">{error}</p> : null}
-        </form>
-      </div>
-    );
+    await load();
   }
 
   const newCount = data?.enquiries.filter((item) => item.status === "new").length ?? 0;
@@ -135,13 +130,22 @@ export default function AdminConsole() {
       <main className="min-w-0">
         <header className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-b border-divider bg-ground px-7 py-4">
           <h1 className="text-[21px]">{VIEWS.find(([id]) => id === view)?.[1]}</h1>
-          <button
-            type="button"
-            onClick={() => load(key).catch((err: Error) => setError(err.message))}
-            className="rounded-full bg-green-700 px-5 py-2.5 text-[14px] font-bold text-white"
-          >
-            Refresh
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => load().catch((err: Error) => setError(err.message))}
+              className="rounded-full bg-green-700 px-5 py-2.5 text-[14px] font-bold text-white"
+            >
+              Refresh
+            </button>
+            <button
+              type="button"
+              onClick={signOut}
+              className="rounded-full border border-divider px-5 py-2.5 text-[14px] font-bold text-ink"
+            >
+              Sign out
+            </button>
+          </div>
         </header>
 
         <div className="flex flex-col gap-5 px-7 py-6 pb-16">
@@ -193,7 +197,7 @@ export default function AdminConsole() {
               <div className="rounded-md border border-divider bg-ground p-5">
                 <h2 className="text-[16px]">New post</h2>
                 <div className="mt-4 flex flex-col gap-3">
-                  {([["tag", "Category"], ["title", "Title"], ["excerpt", "Summary"], ["fileUrl", "PDF link (optional)"]] as const).map(([field, label]) => (
+                  {([["tag", "Category"], ["title", "Title"]] as const).map(([field, label]) => (
                     <label key={field} className="text-[13px] font-bold">
                       {label}
                       <input
@@ -203,11 +207,42 @@ export default function AdminConsole() {
                       />
                     </label>
                   ))}
+                  <label className="text-[13px] font-bold">
+                    Summary
+                    <textarea
+                      rows={2}
+                      value={draft.excerpt}
+                      onChange={(event) => setDraft({ ...draft, excerpt: event.target.value })}
+                      placeholder="One or two sentences for the news card."
+                      className="mt-1.5 w-full rounded-[10px] border border-divider px-3 py-2.5 text-[14.5px] font-normal"
+                    />
+                  </label>
+                  <label className="text-[13px] font-bold">
+                    Article
+                    <textarea
+                      rows={12}
+                      value={draft.body}
+                      onChange={(event) => setDraft({ ...draft, body: event.target.value })}
+                      placeholder="The full article. Leave a blank line between paragraphs."
+                      className="mt-1.5 w-full rounded-[10px] border border-divider px-3 py-2.5 text-[14.5px] font-normal leading-[1.6]"
+                    />
+                    <span className="mt-1.5 block text-[12.5px] font-normal text-sand-700">
+                      The card shows the summary with a Read more link; this is the page behind it.
+                    </span>
+                  </label>
+                  <label className="text-[13px] font-bold">
+                    PDF link (optional)
+                    <input
+                      value={draft.fileUrl}
+                      onChange={(event) => setDraft({ ...draft, fileUrl: event.target.value })}
+                      className="mt-1.5 w-full rounded-[10px] border border-divider px-3 py-2.5 text-[14.5px] font-normal"
+                    />
+                  </label>
                   <button
                     type="button"
                     onClick={async () => {
                       await act({ type: "post.create", ...draft });
-                      setDraft({ tag: "", title: "", excerpt: "", fileUrl: "" });
+                      setDraft({ tag: "", title: "", excerpt: "", body: "", fileUrl: "" });
                     }}
                     className="self-start rounded-full bg-green-700 px-5 py-2.5 text-[14px] font-bold text-white"
                   >
@@ -300,6 +335,43 @@ export default function AdminConsole() {
                   <span className="text-[13px] text-sand-700">{date(subscriber.created_at)}</span>
                 </div>
               ))}
+            </div>
+          ) : null}
+
+          {view === "settings" ? (
+            <div className="max-w-[520px] rounded-md border border-divider bg-ground p-6">
+              <h2 className="text-[16px]">Change the dashboard password</h2>
+              <p className="mt-1.5 text-[13.5px] text-sand-700">
+                At least 10 characters. Everyone who signs in shares this password.
+              </p>
+              <div className="mt-5 flex flex-col gap-3">
+                {(
+                  [
+                    ["current", "Current password"],
+                    ["next", "New password"],
+                    ["confirm", "Confirm new password"],
+                  ] as const
+                ).map(([field, label]) => (
+                  <label key={field} className="text-[13px] font-bold">
+                    {label}
+                    <input
+                      type="password"
+                      autoComplete={field === "current" ? "current-password" : "new-password"}
+                      value={pw[field]}
+                      onChange={(event) => setPw({ ...pw, [field]: event.target.value })}
+                      className="mt-1.5 w-full rounded-[10px] border border-divider px-3 py-2.5 text-[14.5px] font-normal"
+                    />
+                  </label>
+                ))}
+                <button
+                  type="button"
+                  onClick={changePassword}
+                  className="self-start rounded-full bg-green-700 px-5 py-2.5 text-[14px] font-bold text-white"
+                >
+                  Change password
+                </button>
+                {pwNote ? <p className="text-[13.5px] font-bold text-green-700">{pwNote}</p> : null}
+              </div>
             </div>
           ) : null}
         </div>

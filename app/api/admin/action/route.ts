@@ -5,7 +5,7 @@ import { getSql } from "@/lib/db";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
-  const denied = requireAdmin(request);
+  const denied = await requireAdmin();
   if (denied) return denied;
 
   let body: Record<string, unknown>;

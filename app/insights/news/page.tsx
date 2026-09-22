@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getSql } from "@/lib/db";
 import SubscribeForm from "@/components/SubscribeForm";
 import { PageHero, Section, Shell } from "@/components/ui";
@@ -40,12 +41,15 @@ export default async function NewsPage() {
                 <article key={post.id}>
                   <div className="text-[13.5px] font-bold text-gold-700">{post.tag}</div>
                   <h2 className="mt-2 text-[24px] leading-[1.18]">{post.title}</h2>
-                  {post.excerpt ? <p className="mt-3 text-[16.5px] leading-[1.6] text-sand-700">{post.excerpt}</p> : null}
-                  {post.file_url ? (
-                    <a href={post.file_url} className="mt-4 inline-block text-[15px] font-bold">
-                      Download the PDF
-                    </a>
+                  {post.excerpt ? (
+                    <p className="mt-3 line-clamp-3 text-[16.5px] leading-[1.6] text-sand-700">{post.excerpt}</p>
                   ) : null}
+                  <Link
+                    href={"/insights/news/" + post.id}
+                    className="mt-4 inline-block border-b-2 border-gold-400 pb-0.5 text-[15px] font-bold no-underline"
+                  >
+                    Read more
+                  </Link>
                   <div className="mt-3 text-[13.5px] text-sand-600">
                     {new Date(post.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
                   </div>

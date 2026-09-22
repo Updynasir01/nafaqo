@@ -11,7 +11,7 @@ export default function ContactPage() {
       <PageHero
         kicker="Get in touch"
         title="Come and see the kitchen"
-        standfirst="We are in Mogadishu, Somalia. Write to us, call, or drop in."
+        standfirst="We are in Hodan, Mogadishu. Write to us, call, or drop in."
       />
 
       <Section>

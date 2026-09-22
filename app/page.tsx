@@ -17,8 +17,8 @@ export default function HomePage() {
           className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,42,28,0.62)_0%,rgba(11,42,28,0.4)_42%,rgba(11,42,28,0.92)_100%)]"
         />
         <Shell className="relative w-full animate-rise pb-20 pt-[130px]">
-          <h1 className="m-0 max-w-[9ch] font-head text-[clamp(32px,11vw,100px)] font-semibold leading-[0.92] [text-shadow:0_2px_24px_rgba(11,42,28,0.55)]">
-            Nourishing <br /> Somalia's <span className="text-gold-300">Future.</span>
+          <h1 className="m-0 max-w-[9ch] font-head text-[clamp(52px,11vw,150px)] font-semibold leading-[0.92] [text-shadow:0_2px_24px_rgba(11,42,28,0.55)]">
+            Nourishing the <span className="text-gold-300">Future</span>
           </h1>
           <div className="mt-10 flex flex-wrap gap-3">
             <PillLink href="/model/how-it-works">Explore Our Model</PillLink>

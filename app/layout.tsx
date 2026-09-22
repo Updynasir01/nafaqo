@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     "Nafaqo Kitchen is building a central kitchen in Mogadishu to cook hot meals for schools every morning \u2014 sourced locally, delivered on fixed routes and verified to the child.",
   openGraph: {
     title: "Nafaqo Kitchen",
-    description: "Nourishing Somalia's Future.",
+    description: "Nourishing the Future.",
     url: "https://nafaqo.org",
     siteName: "Nafaqo Kitchen",
     type: "website",
