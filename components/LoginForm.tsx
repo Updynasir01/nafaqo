@@ -1,11 +1,10 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function LoginForm() {
   const router = useRouter();
-  const params = useSearchParams();
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -25,7 +24,8 @@ export default function LoginForm() {
       setError(body.error ?? "Could not sign in.");
       return;
     }
-    router.replace(params.get("next") ?? "/admin");
+    const next = new URLSearchParams(window.location.search).get("next");
+    router.replace(next && next.startsWith("/admin") ? next : "/admin");
     router.refresh();
   }
 
@@ -47,7 +47,7 @@ export default function LoginForm() {
           disabled={busy}
           className="mt-4 w-full rounded-full bg-green-700 px-6 py-3 text-[15px] font-bold text-white disabled:opacity-60"
         >
-          {busy ? "Signing in\u2026" : "Sign in"}
+          {busy ? "Signing in…" : "Sign in"}
         </button>
         {error ? <p className="mt-3 text-[14px] text-gold-700">{error}</p> : null}
       </form>
