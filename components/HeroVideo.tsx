@@ -1,13 +1,15 @@
 "use client";
 
-import { heroVideoId } from "@/content/site";
+import { youtubeId } from "@/lib/content-schema";
 
-export default function HeroVideo() {
+export default function HeroVideo({ video }: { video: string }) {
+  const id = youtubeId(video);
+  if (!id) return null;
   const src =
     "https://www.youtube.com/embed/" +
-    heroVideoId +
+    id +
     "?autoplay=1&mute=1&loop=1&playlist=" +
-    heroVideoId +
+    id +
     "&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&disablekb=1";
 
   return (

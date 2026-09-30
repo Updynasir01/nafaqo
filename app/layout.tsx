@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Rubik, Nunito_Sans } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { getContent } from "@/lib/content";
 import "./globals.css";
 
 const rubik = Rubik({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-head", display: "swap" });
@@ -21,13 +22,28 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+// Content is edited from the dashboard, so every page is rendered on request.
+export const dynamic = "force-dynamic";
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const c = await getContent();
+  const footer = {
+    ctaTitle: c.footerCtaTitle,
+    blurb: c.footerBlurb,
+    stayBody: c.footerStayBody,
+    tagline: c.tagline,
+    address1: c.contactAddress1,
+    address2: c.contactAddress2,
+    phone: c.contactPhone,
+    email: c.contactEmail,
+  };
+
   return (
     <html lang="en" className={rubik.variable + " " + nunito.variable}>
       <body className="flex min-h-screen flex-col">
         <Navbar />
         <main className="flex-1">{children}</main>
-        <Footer />
+        <Footer content={footer} />
       </body>
     </html>
   );

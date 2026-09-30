@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { modelNodes } from "@/content/site";
+import type { Item } from "@/lib/content-schema";
 
 const SPOKES = [0, 1, 2, 3, 4, 5];
 
-export default function ModelDiagram({ compact = false }: { compact?: boolean }) {
+export default function ModelDiagram({ nodes: modelNodes, compact = false }: { nodes: Item[]; compact?: boolean }) {
   const [active, setActive] = useState(0);
-  const node = modelNodes[active];
+  const node = modelNodes[Math.min(active, Math.max(modelNodes.length - 1, 0))] ?? { num: "", short: "", title: "", body: "" };
   const hubLive = active === 0;
   const spokesLive = active === 1 || active === 2;
   const recordLive = active === 2;

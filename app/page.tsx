@@ -1,28 +1,35 @@
 import Link from "next/link";
 import ChainStrip from "@/components/ChainStrip";
 import HeroVideo from "@/components/HeroVideo";
+import Highlight from "@/components/Highlight";
 import Icon, { type IconName } from "@/components/Icon";
 import ModelDiagram from "@/components/ModelDiagram";
 import Reveal from "@/components/Reveal";
 import { PillLink, Section, Shell } from "@/components/ui";
-import { operatingStandard, outcomes, partners } from "@/content/site";
+import { getContent } from "@/lib/content";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const c = await getContent();
+
   return (
     <>
       <section className="relative -mt-[74px] flex min-h-[min(100vh,860px)] items-end overflow-hidden bg-green-900 text-sand-100">
-        <HeroVideo />
+        <HeroVideo video={c.homeVideo} />
         <div
           aria-hidden="true"
           className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,42,28,0.62)_0%,rgba(11,42,28,0.4)_42%,rgba(11,42,28,0.92)_100%)]"
         />
         <Shell className="relative w-full animate-rise pb-20 pt-[130px]">
           <h1 className="m-0 max-w-[9ch] font-head text-[clamp(52px,11vw,150px)] font-semibold leading-[0.92] [text-shadow:0_2px_24px_rgba(11,42,28,0.55)]">
-            Nourishing the <span className="text-gold-300">Future</span>
+            {c.homeHeroTitle} <span className="text-gold-300">{c.homeHeroAccent}</span>
           </h1>
-          <div className="mt-10 flex flex-wrap gap-3">
-            <PillLink href="/model/how-it-works">Explore Our Model</PillLink>
-          </div>
+          {c.homeHeroButton ? (
+            <div className="mt-10 flex flex-wrap gap-3">
+              <PillLink href="/model/how-it-works">{c.homeHeroButton}</PillLink>
+            </div>
+          ) : null}
         </Shell>
       </section>
 
@@ -30,11 +37,10 @@ export default function HomePage() {
         <Shell className="py-20">
           <Reveal>
             <h2 className="mb-14 max-w-[30ch] text-[clamp(24px,3.2vw,40px)] leading-[1.14] text-sand-500">
-              Buying, cooking, delivery and checking all sit <span className="text-ink">in one system we run ourselves</span> &mdash;
-              which is how a meal stays <span className="text-ink">safe, the same every day, and cheap enough to grow.</span>
+              <Highlight text={c.homeStatement} className="text-ink" />
             </h2>
           </Reveal>
-          <ChainStrip />
+          <ChainStrip chain={c.chain} />
         </Shell>
       </Section>
 
@@ -43,15 +49,17 @@ export default function HomePage() {
           <div className="overflow-hidden rounded-lg bg-green-800 text-sand-100">
             <div className="grid grid-cols-1 items-center gap-12 p-[clamp(28px,5vw,60px)] md:grid-cols-2">
               <div>
-                <h2 className="max-w-[22ch] text-[clamp(24px,3vw,38px)] leading-[1.1]">One kitchen. Many schools. One record.</h2>
-                <p className="mt-5 max-w-[44ch] text-[17px] leading-[1.65] text-white/[0.85]">
-                  Meals get lost in the gaps between people. We run one kitchen, many schools, and one record that joins them.
-                </p>
-                <div className="mt-8">
-                  <PillLink href="/model/how-it-works" variant="outlineGold">How it works</PillLink>
-                </div>
+                <h2 className="max-w-[22ch] text-[clamp(24px,3vw,38px)] leading-[1.1]">{c.homeModelTitle}</h2>
+                <p className="mt-5 max-w-[44ch] text-[17px] leading-[1.65] text-white/[0.85]">{c.homeModelBody}</p>
+                {c.homeModelButton ? (
+                  <div className="mt-8">
+                    <PillLink href="/model/how-it-works" variant="outlineGold">
+                      {c.homeModelButton}
+                    </PillLink>
+                  </div>
+                ) : null}
               </div>
-              <ModelDiagram />
+              <ModelDiagram nodes={c.modelNodes} />
             </div>
           </div>
         </Shell>
@@ -59,10 +67,10 @@ export default function HomePage() {
 
       <Section tone="surface">
         <Shell className="py-20">
-          <h2 className="max-w-[24ch] text-[clamp(24px,3vw,38px)] leading-[1.1]">What a meal changes</h2>
+          <h2 className="max-w-[24ch] text-[clamp(24px,3vw,38px)] leading-[1.1]">{c.homeOutcomesTitle}</h2>
           <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {outcomes.map((outcome) => (
-              <div key={outcome.title} className="border-t-2 border-green-800 pt-4">
+            {c.outcomes.map((outcome, index) => (
+              <div key={index} className="border-t-2 border-green-800 pt-4">
                 <h3 className="text-[19px] leading-[1.22] text-green-800">{outcome.title}</h3>
                 <p className="mt-3 text-[15.5px] leading-[1.62] text-sand-700">{outcome.body}</p>
               </div>
@@ -73,13 +81,11 @@ export default function HomePage() {
 
       <Section>
         <Shell className="py-20">
-          <h2 className="max-w-[22ch] text-[clamp(24px,3vw,38px)] leading-[1.1]">Who we work with</h2>
-          <p className="mt-4 max-w-[48ch] text-[17px] leading-[1.6] text-sand-700">
-            School feeding only works when everyone carries a part of it.
-          </p>
+          <h2 className="max-w-[22ch] text-[clamp(24px,3vw,38px)] leading-[1.1]">{c.workTitle}</h2>
+          <p className="mt-4 max-w-[48ch] text-[17px] leading-[1.6] text-sand-700">{c.workBody}</p>
           <div className="mt-12 grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-4">
-            {partners.map((partner) => (
-              <div key={partner.title} className="rounded-md bg-surface p-7">
+            {c.workWith.map((partner, index) => (
+              <div key={index} className="rounded-md bg-surface p-7">
                 <span className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-green-100 text-green-700">
                   <Icon name={partner.icon as IconName} size={20} />
                 </span>
@@ -94,13 +100,15 @@ export default function HomePage() {
       <Section tone="greenDeep">
         <Shell className="py-20 text-center">
           <p className="mx-auto max-w-[46ch] font-head text-[clamp(20px,2.6vw,32px)] font-semibold leading-[1.22] text-sand-100">
-            {operatingStandard}
+            {c.operatingStandard}
           </p>
           <div className="mt-10 flex flex-wrap justify-center gap-3">
-            <PillLink href="/contact">Contact Us</PillLink>
-            <Link href="/insights/news" className="rounded-full border border-white/45 px-7 py-4 text-[15px] font-bold text-sand-100 no-underline transition-colors hover:bg-white/10">
-              Latest updates
-            </Link>
+            {c.homeCtaPrimary ? <PillLink href="/contact">{c.homeCtaPrimary}</PillLink> : null}
+            {c.homeCtaSecondary ? (
+              <Link href="/insights/news" className="rounded-full border border-white/45 px-7 py-4 text-[15px] font-bold text-sand-100 no-underline transition-colors hover:bg-white/10">
+                {c.homeCtaSecondary}
+              </Link>
+            ) : null}
           </div>
         </Shell>
       </Section>

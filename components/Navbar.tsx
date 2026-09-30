@@ -45,6 +45,8 @@ export default function Navbar() {
     };
   }, []);
 
+  if (pathname.startsWith("/admin")) return null;
+
   const tab = (active: boolean) =>
     "flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2.5 text-[14.5px] transition-colors " +
     (overHero

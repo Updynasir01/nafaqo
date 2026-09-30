@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { capabilities } from "@/content/site";
+import type { Item } from "@/lib/content-schema";
 import Icon, { type IconName } from "./Icon";
 
-export default function CapabilityExplorer({ initial = 0 }: { initial?: number }) {
-  const [active, setActive] = useState(Math.min(Math.max(initial, 0), capabilities.length - 1));
-  const item = capabilities[active];
+export default function CapabilityExplorer({ items: capabilities, initial = 0 }: { items: Item[]; initial?: number }) {
+  const [active, setActive] = useState(Math.min(Math.max(initial, 0), Math.max(capabilities.length - 1, 0)));
+  if (capabilities.length === 0) return null;
+  const item = capabilities[Math.min(active, capabilities.length - 1)];
+  const tags = (item.tags ?? "").split(",").map((tag) => tag.trim()).filter(Boolean);
 
   return (
     <div className="grid grid-cols-1 items-start gap-10 md:grid-cols-2">
@@ -39,7 +41,7 @@ export default function CapabilityExplorer({ initial = 0 }: { initial?: number }
         <h2 className="mb-4 mt-4 text-[clamp(24px,2.8vw,34px)] font-semibold leading-[1.12]">{item.title}</h2>
         <p className="m-0 text-[17px] leading-[1.65] text-white/[0.88]">{item.body}</p>
         <div className="mt-auto flex flex-wrap gap-2 pt-9">
-          {item.tags.map((tag) => (
+          {tags.map((tag) => (
             <span key={tag} className="rounded-full border border-gold-300/40 px-3.5 py-[7px] text-[12.5px] font-semibold text-gold-300">
               {tag}
             </span>

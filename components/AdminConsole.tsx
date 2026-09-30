@@ -3,14 +3,16 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import PageEditor from "@/components/PageEditor";
 import RichTextEditor from "@/components/RichTextEditor";
+import type { Content } from "@/lib/content-schema";
 
 type Enquiry = { id: number; name: string; organisation: string | null; email: string; partner_type: string | null; message: string; status: string; created_at: string };
 type Subscriber = { id: number; email: string; created_at: string };
 type Post = { id: number; tag: string; title: string; excerpt: string | null; file_url: string | null; published: boolean; created_at: string };
 type Doc = { id: number; title: string; note: string | null; status: string; file_url: string | null };
 type Partner = { id: number; name: string; logo_url: string | null; website_url: string | null };
-type Data = { enquiries: Enquiry[]; subscribers: Subscriber[]; posts: Post[]; documents: Doc[]; partners?: Partner[] };
+type Data = { enquiries: Enquiry[]; subscribers: Subscriber[]; posts: Post[]; documents: Doc[]; partners?: Partner[]; content?: Content };
 
 /** Shrinks an uploaded logo in the browser so it can be stored with the partner. */
 async function imageToDataUrl(file: File): Promise<string> {
@@ -38,6 +40,7 @@ async function imageToDataUrl(file: File): Promise<string> {
 
 const VIEWS = [
   ["overview", "Overview"],
+  ["pages", "Edit pages"],
   ["news", "News & Updates"],
   ["enquiries", "Enquiries"],
   ["subscribers", "Subscribers"],
@@ -151,6 +154,18 @@ export default function AdminConsole() {
             );
           })}
         </nav>
+        <button
+          type="button"
+          onClick={signOut}
+          className="mt-auto flex items-center gap-2 rounded-[10px] border border-white/15 px-3 py-2.5 text-left text-[14.5px] font-bold text-white/80 hover:bg-white/[0.08] hover:text-white"
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <path d="m16 17 5-5-5-5" />
+            <path d="M21 12H9" />
+          </svg>
+          Sign out
+        </button>
       </aside>
 
       <main className="min-w-0">
@@ -163,13 +178,6 @@ export default function AdminConsole() {
               className="rounded-full bg-green-700 px-5 py-2.5 text-[14px] font-bold text-white"
             >
               Refresh
-            </button>
-            <button
-              type="button"
-              onClick={signOut}
-              className="rounded-full border border-divider px-5 py-2.5 text-[14px] font-bold text-ink"
-            >
-              Sign out
             </button>
           </div>
         </header>
@@ -193,6 +201,10 @@ export default function AdminConsole() {
                 </div>
               ))}
             </div>
+          ) : null}
+
+          {data && view === "pages" && data.content ? (
+            <PageEditor content={data.content} onSaved={load} />
           ) : null}
 
           {data && view === "news" ? (

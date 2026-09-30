@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/admin";
 import { getSql } from "@/lib/db";
 import { ensurePartnersTable } from "@/lib/partners";
 import { sanitizeHtml } from "@/lib/sanitize";
+import { saveContent } from "@/lib/content";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +44,12 @@ export async function POST(request: Request) {
                file_url = ${String(body.fileUrl ?? "") || null},
                updated_at = now()
          where id = ${id}`;
+    } else if (type === "content.save") {
+      const values = body.values;
+      if (!values || typeof values !== "object" || Array.isArray(values)) {
+        return NextResponse.json({ error: "Nothing to save." }, { status: 422 });
+      }
+      await saveContent(values as Record<string, unknown>);
     } else if (type === "partner.create") {
       const name = String(body.name ?? "").trim();
       const logo = String(body.logoUrl ?? "").trim();

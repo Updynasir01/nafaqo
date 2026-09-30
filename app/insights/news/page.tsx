@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getSql } from "@/lib/db";
 import SubscribeForm from "@/components/SubscribeForm";
 import { PageHero, Section, Shell } from "@/components/ui";
+import { getContent } from "@/lib/content";
 
 export const metadata = { title: "News & Updates" };
 export const dynamic = "force-dynamic";
@@ -23,15 +24,11 @@ async function getPosts(): Promise<Post[]> {
 }
 
 export default async function NewsPage() {
-  const posts = await getPosts();
+  const [posts, c] = await Promise.all([getPosts(), getContent()]);
 
   return (
     <>
-      <PageHero
-        kicker="Insights"
-        title="News &amp; updates"
-        standfirst="Progress as we build the kitchen, choose the first schools and set the standards we will report against."
-      />
+      <PageHero kicker={c.newsKicker} title={c.newsTitle} standfirst={c.newsStandfirst} />
 
       <Section>
         <Shell className="py-20">
@@ -62,9 +59,9 @@ export default async function NewsPage() {
             </div>
           ) : (
             <div className="rounded-lg bg-surface p-12 text-center">
-              <h2 className="text-[23px] leading-[1.2]">The first pieces go up soon</h2>
+              <h2 className="text-[23px] leading-[1.2]">{c.newsEmptyTitle}</h2>
               <p className="mx-auto mt-3 max-w-[42ch] text-[16.5px] leading-[1.6] text-sand-800">
-                Leave your email and we will send the first one when it is ready.
+                {c.newsEmptyBody}
               </p>
               <div className="mx-auto mt-6 max-w-[440px]">
                 <SubscribeForm />

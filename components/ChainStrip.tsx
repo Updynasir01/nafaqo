@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { chain } from "@/content/site";
+import type { Item } from "@/lib/content-schema";
 import Icon, { type IconName } from "./Icon";
 
-export default function ChainStrip() {
+export default function ChainStrip({ chain }: { chain: Item[] }) {
   const [active, setActive] = useState(0);
+  if (chain.length === 0) return null;
+  const current = chain[Math.min(active, chain.length - 1)];
 
   return (
     <div>
@@ -39,7 +41,7 @@ export default function ChainStrip() {
           );
         })}
       </div>
-      <p className="mt-6 max-w-[60ch] text-[16.5px] leading-[1.65] text-sand-800">{chain[active].note}</p>
+      <p className="mt-6 max-w-[60ch] text-[16.5px] leading-[1.65] text-sand-800">{current.note}</p>
     </div>
   );
 }

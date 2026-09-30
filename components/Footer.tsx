@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { contact } from "@/content/site";
 import SubscribeForm from "./SubscribeForm";
 
 const groups = [
@@ -29,15 +28,27 @@ const groups = [
   },
 ];
 
-export default function Footer() {
+export type FooterContent = {
+  ctaTitle: string;
+  blurb: string;
+  stayBody: string;
+  tagline: string;
+  address1: string;
+  address2: string;
+  phone: string;
+  email: string;
+};
+
+export default function Footer({ content }: { content: FooterContent }) {
   const pathname = usePathname();
+  if (pathname.startsWith("/admin")) return null;
 
   return (
     <footer className="overflow-hidden bg-green-900 text-white/[0.78]">
       {pathname !== "/" ? (
         <div className="mx-auto flex max-w-shell flex-wrap items-center justify-between gap-6 border-b border-white/[0.12] px-6 py-16">
           <h2 className="m-0 max-w-[26ch] text-[clamp(24px,3.2vw,38px)] leading-[1.12] text-sand-100">
-            A school meal is the cheapest thing we can do for a child’s education.
+            {content.ctaTitle}
           </h2>
           <Link
             href="/contact"
@@ -54,13 +65,13 @@ export default function Footer() {
             <Image src="/assets/nafaqo-logo.png" alt="Nafaqo Kitchen" width={190} height={42} className="h-[42px] w-auto" />
           </div>
           <p className="m-0 max-w-[32ch] text-[15.5px] leading-[1.62]">
-            Building hot school meals for Somali children, cooked in Mogadishu.
+            {content.blurb}
           </p>
         </div>
         <div>
           <div className="mb-3 text-[11.5px] font-bold uppercase tracking-[0.13em] text-gold-300">Stay informed</div>
           <p className="mb-3 max-w-[34ch] text-[14.5px] leading-[1.55]">
-            We will publish operating reports quarterly and results annually.
+            {content.stayBody}
           </p>
           <SubscribeForm />
         </div>
@@ -82,13 +93,13 @@ export default function Footer() {
         <div>
           <div className="mb-4 text-[11.5px] font-bold uppercase tracking-[0.13em] text-gold-300">Contact</div>
           <p className="m-0 text-[15px] leading-[1.7]">
-            {contact.address[0]}
+            {content.address1}
             <br />
-            {contact.address[1]}
+            {content.address2}
             <br />
-            <a href={"tel:" + contact.phone.replace(/\s/g, "")} className="text-sand-100 no-underline hover:text-gold-300">{contact.phone}</a>
+            <a href={"tel:" + content.phone.replace(/\s/g, "")} className="text-sand-100 no-underline hover:text-gold-300">{content.phone}</a>
             <br />
-            <a href={"mailto:" + contact.email} className="text-sand-100 no-underline hover:text-gold-300">{contact.email}</a>
+            <a href={"mailto:" + content.email} className="text-sand-100 no-underline hover:text-gold-300">{content.email}</a>
           </p>
         </div>
       </div>
@@ -96,7 +107,7 @@ export default function Footer() {
       <div className="border-t border-white/[0.12]">
         <div className="mx-auto flex max-w-shell flex-wrap justify-between gap-x-8 gap-y-4 px-6 py-4 text-[13px] tracking-[0.03em]">
           <span>© {new Date().getFullYear()} Nafaqo Kitchen</span>
-          <span>{contact.tagline}</span>
+          <span>{content.tagline}</span>
         </div>
       </div>
 
