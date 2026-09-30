@@ -2,10 +2,14 @@ import Image from "next/image";
 import Faq from "@/components/Faq";
 import { PageHero, Section, Shell } from "@/components/ui";
 import { faqs, mission, story, values, vision, whereWeStart } from "@/content/site";
+import { listPartners } from "@/lib/partners";
 
 export const metadata = { title: "Who We Are" };
+export const dynamic = "force-dynamic";
 
-export default function WhoWeArePage() {
+export default async function WhoWeArePage() {
+  const partners = await listPartners();
+
   return (
     <>
       <PageHero
@@ -87,6 +91,41 @@ export default function WhoWeArePage() {
           <Faq items={faqs} />
         </Shell>
       </Section>
+
+      {partners.length > 0 ? (
+        <Section>
+          <Shell className="py-20">
+            <h2 className="max-w-[22ch] text-[clamp(25px,3vw,38px)] leading-[1.1]">Our partners</h2>
+            <p className="mt-4 max-w-[52ch] text-[17.5px] leading-[1.68] text-sand-800">
+              The organisations working with us to build the model.
+            </p>
+            <div className="mt-10 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
+              {partners.map((partner) => {
+                const card = (
+                  <>
+                    <div className="flex h-[128px] items-center justify-center rounded-md border border-divider bg-ground p-5">
+                      {partner.logo_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={partner.logo_url} alt={partner.name} className="max-h-full max-w-full object-contain" />
+                      ) : (
+                        <span className="text-center font-head text-[18px] font-semibold text-green-800">{partner.name}</span>
+                      )}
+                    </div>
+                    <div className="mt-3 text-center text-[15px] font-bold text-ink">{partner.name}</div>
+                  </>
+                );
+                return partner.website_url ? (
+                  <a key={partner.id} href={partner.website_url} target="_blank" rel="noopener noreferrer" className="block no-underline">
+                    {card}
+                  </a>
+                ) : (
+                  <div key={partner.id}>{card}</div>
+                );
+              })}
+            </div>
+          </Shell>
+        </Section>
+      ) : null}
     </>
   );
 }

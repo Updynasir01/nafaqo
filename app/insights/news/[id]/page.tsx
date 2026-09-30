@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSql } from "@/lib/db";
 import { Section, Shell } from "@/components/ui";
+import { looksLikeHtml, sanitizeHtml } from "@/lib/sanitize";
 
 export const dynamic = "force-dynamic";
 
@@ -42,10 +43,15 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
   const post = await getPost(id);
   if (!post) notFound();
 
-  const paragraphs = (post.body ?? post.excerpt ?? "")
-    .split(/\n\s*\n/)
-    .map((block) => block.trim())
-    .filter(Boolean);
+  const raw = post.body ?? "";
+  const formatted = looksLikeHtml(raw) ? sanitizeHtml(raw) : null;
+  // Posts written before the rich editor are plain text split on blank lines.
+  const paragraphs = formatted
+    ? []
+    : (raw || post.excerpt || "")
+        .split(/\n\s*\n/)
+        .map((block) => block.trim())
+        .filter(Boolean);
 
   return (
     <>
@@ -64,13 +70,17 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
             <p className="mt-10 border-l-[3px] border-gold-400 pl-6 text-[19px] leading-[1.6] text-ink">{post.excerpt}</p>
           ) : null}
 
-          <div className="mt-10">
-            {paragraphs.map((paragraph, index) => (
-              <p key={index} className="mb-6 text-[17.5px] leading-[1.75] text-sand-800 last:mb-0">
-                {paragraph}
-              </p>
-            ))}
-          </div>
+          {formatted ? (
+            <div className="rich-text mt-10 text-[17.5px]" dangerouslySetInnerHTML={{ __html: formatted }} />
+          ) : (
+            <div className="mt-10">
+              {paragraphs.map((paragraph, index) => (
+                <p key={index} className="mb-6 text-[17.5px] leading-[1.75] text-sand-800 last:mb-0">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+          )}
 
           {post.file_url ? (
             <a

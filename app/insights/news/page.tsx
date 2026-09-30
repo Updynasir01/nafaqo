@@ -40,7 +40,11 @@ export default async function NewsPage() {
               {posts.map((post) => (
                 <article key={post.id}>
                   <div className="text-[13.5px] font-bold text-gold-700">{post.tag}</div>
-                  <h2 className="mt-2 text-[24px] leading-[1.18]">{post.title}</h2>
+                  <h2 className="mt-2 text-[24px] leading-[1.18]">
+                    <Link href={"/insights/news/" + post.id} className="text-ink no-underline hover:text-green-700">
+                      {post.title}
+                    </Link>
+                  </h2>
                   {post.excerpt ? (
                     <p className="mt-3 line-clamp-3 text-[16.5px] leading-[1.6] text-sand-700">{post.excerpt}</p>
                   ) : null}

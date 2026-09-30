@@ -48,3 +48,12 @@ create table if not exists app_settings (
   value       text not null,
   updated_at  timestamptz not null default now()
 );
+
+create table if not exists partners (
+  id           bigserial primary key,
+  name         text not null,
+  logo_url     text,
+  website_url  text,
+  sort_order   integer not null default 0,
+  created_at   timestamptz not null default now()
+);

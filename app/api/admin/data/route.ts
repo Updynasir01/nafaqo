@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { getSql } from "@/lib/db";
+import { listPartners } from "@/lib/partners";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,8 @@ export async function GET() {
       sql`select id, tag, title, excerpt, file_url, published, created_at from posts order by created_at desc`,
       sql`select id, title, note, status, file_url, updated_at from documents order by id`,
     ]);
-    return NextResponse.json({ enquiries, subscribers, posts, documents });
+    const partners = await listPartners();
+    return NextResponse.json({ enquiries, subscribers, posts, documents, partners });
   } catch (error) {
     console.error("admin data failed", error);
     return NextResponse.json({ error: "Could not load the dashboard data." }, { status: 500 });

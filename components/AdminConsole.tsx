@@ -3,12 +3,38 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import RichTextEditor from "@/components/RichTextEditor";
 
 type Enquiry = { id: number; name: string; organisation: string | null; email: string; partner_type: string | null; message: string; status: string; created_at: string };
 type Subscriber = { id: number; email: string; created_at: string };
 type Post = { id: number; tag: string; title: string; excerpt: string | null; file_url: string | null; published: boolean; created_at: string };
 type Doc = { id: number; title: string; note: string | null; status: string; file_url: string | null };
-type Data = { enquiries: Enquiry[]; subscribers: Subscriber[]; posts: Post[]; documents: Doc[] };
+type Partner = { id: number; name: string; logo_url: string | null; website_url: string | null };
+type Data = { enquiries: Enquiry[]; subscribers: Subscriber[]; posts: Post[]; documents: Doc[]; partners?: Partner[] };
+
+/** Shrinks an uploaded logo in the browser so it can be stored with the partner. */
+async function imageToDataUrl(file: File): Promise<string> {
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const el = new window.Image();
+      el.onload = () => resolve(el);
+      el.onerror = () => reject(new Error("That image could not be read."));
+      el.src = objectUrl;
+    });
+    const scale = Math.min(1, 480 / Math.max(img.naturalWidth || 1, img.naturalHeight || 1));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round((img.naturalWidth || 1) * scale));
+    canvas.height = Math.max(1, Math.round((img.naturalHeight || 1) * scale));
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("That image could not be read.");
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    const webp = canvas.toDataURL("image/webp", 0.9);
+    return webp.startsWith("data:image/webp") ? webp : canvas.toDataURL("image/png");
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
 
 const VIEWS = [
   ["overview", "Overview"],
@@ -36,6 +62,8 @@ export default function AdminConsole() {
   const [data, setData] = useState<Data | null>(null);
   const [error, setError] = useState("");
   const [draft, setDraft] = useState({ tag: "", title: "", excerpt: "", body: "", fileUrl: "" });
+  const [partnerDraft, setPartnerDraft] = useState({ name: "", websiteUrl: "", logoUrl: "" });
+  const [partnerNote, setPartnerNote] = useState("");
 
   const load = useCallback(async () => {
     const response = await fetch("/api/admin/data", { cache: "no-store" });
@@ -171,7 +199,7 @@ export default function AdminConsole() {
           ) : null}
 
           {data && view === "news" ? (
-            <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-2">
+            <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
               <div className="overflow-hidden rounded-md border border-divider bg-ground">
                 {data.posts.map((post) => (
                   <div key={post.id} className="flex items-start justify-between gap-3 border-b border-divider p-4">
@@ -218,19 +246,19 @@ export default function AdminConsole() {
                       className="mt-1.5 w-full rounded-[10px] border border-divider px-3 py-2.5 text-[14.5px] font-normal"
                     />
                   </label>
-                  <label className="text-[13px] font-bold">
+                  <div className="text-[13px] font-bold">
                     Article
-                    <textarea
-                      rows={12}
-                      value={draft.body}
-                      onChange={(event) => setDraft({ ...draft, body: event.target.value })}
-                      placeholder="The full article. Leave a blank line between paragraphs."
-                      className="mt-1.5 w-full rounded-[10px] border border-divider px-3 py-2.5 text-[14.5px] font-normal leading-[1.6]"
-                    />
+                    <div className="mt-1.5">
+                      <RichTextEditor
+                        value={draft.body}
+                        onChange={(html) => setDraft((current) => ({ ...current, body: html }))}
+                        placeholder="Write the full article. Select text to change its font, size or alignment."
+                      />
+                    </div>
                     <span className="mt-1.5 block text-[12.5px] font-normal text-sand-700">
-                      The card shows the summary with a Read more link; this is the page behind it.
+                      The news card shows the title and summary; both link to this article.
                     </span>
-                  </label>
+                  </div>
                   <label className="text-[13px] font-bold">
                     PDF link (optional)
                     <input
@@ -336,6 +364,106 @@ export default function AdminConsole() {
                   <span className="text-[13px] text-sand-700">{date(subscriber.created_at)}</span>
                 </div>
               ))}
+            </div>
+          ) : null}
+
+          {data && view === "settings" ? (
+            <div className="max-w-[760px] rounded-md border border-divider bg-ground p-6">
+              <h2 className="text-[16px]">Partners</h2>
+              <p className="mt-1.5 text-[13.5px] text-sand-700">
+                Partners added here appear on the Who We Are page. Logos are resized automatically.
+              </p>
+
+              <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <label className="text-[13px] font-bold">
+                  Partner name
+                  <input
+                    value={partnerDraft.name}
+                    onChange={(event) => setPartnerDraft({ ...partnerDraft, name: event.target.value })}
+                    className="mt-1.5 w-full rounded-[10px] border border-divider px-3 py-2.5 text-[14.5px] font-normal"
+                  />
+                </label>
+                <label className="text-[13px] font-bold">
+                  Website (optional)
+                  <input
+                    value={partnerDraft.websiteUrl}
+                    onChange={(event) => setPartnerDraft({ ...partnerDraft, websiteUrl: event.target.value })}
+                    placeholder="https://"
+                    className="mt-1.5 w-full rounded-[10px] border border-divider px-3 py-2.5 text-[14.5px] font-normal"
+                  />
+                </label>
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center gap-4">
+                <label className="cursor-pointer rounded-full border border-dashed border-divider bg-surface px-4 py-2.5 text-[13.5px] font-bold">
+                  {partnerDraft.logoUrl ? "Change logo or photo" : "Upload logo or photo"}
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    className="hidden"
+                    onChange={async (event) => {
+                      const file = event.target.files?.[0];
+                      event.target.value = "";
+                      if (!file) return;
+                      setPartnerNote("");
+                      try {
+                        const logoUrl = await imageToDataUrl(file);
+                        setPartnerDraft((current) => ({ ...current, logoUrl }));
+                      } catch (err) {
+                        setPartnerNote(err instanceof Error ? err.message : "That image could not be read.");
+                      }
+                    }}
+                  />
+                </label>
+                {partnerDraft.logoUrl ? (
+                  <span className="flex h-14 w-24 items-center justify-center rounded-[10px] border border-divider bg-ground p-1.5">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={partnerDraft.logoUrl} alt="" className="max-h-full max-w-full object-contain" />
+                  </span>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!partnerDraft.name.trim()) {
+                      setPartnerNote("Enter the partner name.");
+                      return;
+                    }
+                    await act({ type: "partner.create", ...partnerDraft });
+                    setPartnerDraft({ name: "", websiteUrl: "", logoUrl: "" });
+                    setPartnerNote("Partner added.");
+                  }}
+                  className="rounded-full bg-green-700 px-5 py-2.5 text-[14px] font-bold text-white"
+                >
+                  Add partner
+                </button>
+              </div>
+              {partnerNote ? <p className="mt-3 text-[13.5px] font-bold text-green-700">{partnerNote}</p> : null}
+
+              <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {(data.partners ?? []).map((partner) => (
+                  <div key={partner.id} className="rounded-md border border-divider p-3">
+                    <div className="flex h-[72px] items-center justify-center rounded-[10px] bg-surface p-2">
+                      {partner.logo_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={partner.logo_url} alt={partner.name} className="max-h-full max-w-full object-contain" />
+                      ) : (
+                        <span className="text-[12.5px] text-sand-700">No logo</span>
+                      )}
+                    </div>
+                    <div className="mt-2 truncate text-[14px] font-bold">{partner.name}</div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (window.confirm("Remove " + partner.name + " from the website?")) act({ type: "partner.delete", id: partner.id });
+                      }}
+                      className="mt-1 text-[12.5px] font-bold text-gold-700"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+              {(data.partners ?? []).length === 0 ? <p className="mt-2 text-[14px] text-sand-700">No partners yet.</p> : null}
             </div>
           ) : null}
 
