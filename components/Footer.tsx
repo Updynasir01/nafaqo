@@ -25,7 +25,6 @@ const groups = [
     title: "Insights",
     items: [
       { href: "/insights/news", label: "News & Updates" },
-      { href: "/insights/reports", label: "Reports & Resources" },
     ],
   },
 ];
@@ -44,7 +43,7 @@ export default function Footer() {
             href="/contact"
             className="whitespace-nowrap rounded-full bg-gold-400 px-7 py-4 text-[15px] font-bold text-green-900 no-underline transition-colors hover:bg-gold-300"
           >
-            Partner With Us
+            Contact Us
           </Link>
         </div>
       ) : null}

@@ -86,6 +86,14 @@ export default function Navbar() {
           <div className="hidden items-center gap-0.5 lg:flex">
             {nav.map((menu) => {
               const active = menu.items.some((item) => pathname === item.href);
+              // A menu with a single page is a plain link, not a dropdown.
+              if (menu.items.length === 1) {
+                return (
+                  <Link key={menu.label} href={menu.items[0].href} className={tab(active)}>
+                    {menu.label}
+                  </Link>
+                );
+              }
               return (
                 <div key={menu.label} className="relative">
                   <button
@@ -121,9 +129,6 @@ export default function Navbar() {
                 </div>
               );
             })}
-            <Link href="/contact" className={tab(pathname === "/contact")}>
-              Contact
-            </Link>
           </div>
 
           <Link
@@ -133,7 +138,7 @@ export default function Navbar() {
               (overHero ? "border border-white/45 bg-green-600 hover:bg-green-500" : "bg-green-800 hover:bg-green-700")
             }
           >
-            Partner With Us
+            Contact Us
           </Link>
 
           <button
@@ -171,7 +176,19 @@ export default function Navbar() {
 
       {open ? (
         <div className="flex flex-col border-t border-divider bg-ground px-6 pb-6 pt-4 lg:hidden">
-          {nav.map((menu) => (
+          {nav.map((menu) =>
+            menu.items.length === 1 ? (
+              <Link
+                key={menu.label}
+                href={menu.items[0].href}
+                className={
+                  "border-b border-divider py-4 font-head text-[19px] font-semibold no-underline " +
+                  (pathname === menu.items[0].href ? "text-green-800" : "text-ink")
+                }
+              >
+                {menu.label}
+              </Link>
+            ) : (
             <div key={menu.label} className="border-b border-divider">
               <button
                 type="button"
@@ -214,16 +231,8 @@ export default function Navbar() {
                 </div>
               ) : null}
             </div>
-          ))}
-          <Link
-            href="/contact"
-            className={
-              "border-b border-divider py-4 font-head text-[19px] font-semibold no-underline " +
-              (pathname === "/contact" ? "text-green-800" : "text-ink")
-            }
-          >
-            Contact
-          </Link>
+            ),
+          )}
         </div>
       ) : null}
     </header>

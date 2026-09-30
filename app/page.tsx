@@ -97,7 +97,7 @@ export default function HomePage() {
             {operatingStandard}
           </p>
           <div className="mt-10 flex flex-wrap justify-center gap-3">
-            <PillLink href="/contact">Partner With Us</PillLink>
+            <PillLink href="/contact">Contact Us</PillLink>
             <Link href="/insights/news" className="rounded-full border border-white/45 px-7 py-4 text-[15px] font-bold text-sand-100 no-underline transition-colors hover:bg-white/10">
               Latest updates
             </Link>

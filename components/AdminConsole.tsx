@@ -39,13 +39,10 @@ async function imageToDataUrl(file: File): Promise<string> {
 const VIEWS = [
   ["overview", "Overview"],
   ["news", "News & Updates"],
-  ["reports", "Reports"],
   ["enquiries", "Enquiries"],
   ["subscribers", "Subscribers"],
   ["settings", "Settings"],
 ] as const;
-
-const DOC_STATUSES = ["On request", "After launch", "Annually", "Published"];
 
 const chip = (tone: "green" | "gold" | "grey") =>
   "rounded-full px-3 py-1 text-[12px] font-bold " +
@@ -187,7 +184,7 @@ export default function AdminConsole() {
                 ["New enquiries", newCount, "Waiting for a reply"],
                 ["Subscribers", data.subscribers.length, "On the update list"],
                 ["Posts live", data.posts.filter((item) => item.published).length, drafts + " in draft"],
-                ["Documents", data.documents.length, "Listed on Reports"],
+                ["Partners", (data.partners ?? []).length, "On the Who We Are page"],
               ].map(([label, value, note]) => (
                 <div key={String(label)} className="rounded-md border border-divider bg-ground p-5">
                   <div className="text-[12.5px] font-bold uppercase tracking-[0.07em] text-sand-700">{label}</div>
@@ -279,41 +276,6 @@ export default function AdminConsole() {
                   </button>
                 </div>
               </div>
-            </div>
-          ) : null}
-
-          {data && view === "reports" ? (
-            <div className="overflow-hidden rounded-md border border-divider bg-ground">
-              {data.documents.map((doc) => (
-                <div key={doc.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-divider p-4">
-                  <div>
-                    <div className="font-head text-[16px] font-semibold">{doc.title}</div>
-                    {doc.note ? <div className="mt-1 text-[13.5px] text-sand-700">{doc.note}</div> : null}
-                    <div className="mt-1.5 text-[13px] font-bold text-green-700">{doc.file_url ? doc.file_url : "No PDF linked yet"}</div>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <select
-                      value={doc.status}
-                      onChange={(event) => act({ type: "document.update", id: doc.id, status: event.target.value, fileUrl: doc.file_url ?? "" })}
-                      className="rounded-full border border-divider px-3 py-2 text-[13px] font-bold"
-                    >
-                      {DOC_STATUSES.map((status) => (
-                        <option key={status}>{status}</option>
-                      ))}
-                    </select>
-                    <input
-                      defaultValue={doc.file_url ?? ""}
-                      placeholder="https://…/report.pdf"
-                      onBlur={(event) => {
-                        if (event.target.value !== (doc.file_url ?? "")) {
-                          act({ type: "document.update", id: doc.id, status: doc.status, fileUrl: event.target.value });
-                        }
-                      }}
-                      className="w-[240px] rounded-full border border-divider px-3 py-2 text-[13px]"
-                    />
-                  </div>
-                </div>
-              ))}
             </div>
           ) : null}
 

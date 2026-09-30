@@ -20,7 +20,6 @@ export const nav = [
     label: "Insights",
     items: [
       { href: "/insights/news", label: "News & Updates" },
-      { href: "/insights/reports", label: "Reports & Resources" },
     ],
   },
 ] as const;
